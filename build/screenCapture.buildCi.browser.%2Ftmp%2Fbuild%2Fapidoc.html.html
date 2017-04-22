@@ -1,0 +1,427 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/npm/npm-remote-ls">npm-remote-ls (v1.3.2)</a>
+</h1>
+<h4>Examine a package's dependency graph before you install it</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.npm-remote-ls">module npm-remote-ls</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.npm-remote-ls.RemoteLS">
+            function <span class="apidocSignatureSpan">npm-remote-ls.</span>RemoteLS
+            <span class="apidocSignatureSpan">(opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.npm-remote-ls.config">
+            function <span class="apidocSignatureSpan">npm-remote-ls.</span>config
+            <span class="apidocSignatureSpan">(opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.npm-remote-ls.ls">
+            function <span class="apidocSignatureSpan">npm-remote-ls.</span>ls
+            <span class="apidocSignatureSpan">(name, version, flatten, cb)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <span class="apidocSignatureSpan">object <span class="apidocSignatureSpan">npm-remote-ls.</span>RemoteLS.prototype</span>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.npm-remote-ls.RemoteLS">module npm-remote-ls.RemoteLS</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.npm-remote-ls.RemoteLS.RemoteLS">
+            function <span class="apidocSignatureSpan">npm-remote-ls.</span>RemoteLS
+            <span class="apidocSignatureSpan">(opts)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.npm-remote-ls.RemoteLS.prototype">module npm-remote-ls.RemoteLS.prototype</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.npm-remote-ls.RemoteLS.prototype._guessVersion">
+            function <span class="apidocSignatureSpan">npm-remote-ls.RemoteLS.prototype.</span>_guessVersion
+            <span class="apidocSignatureSpan">(versionString, packageJson)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.npm-remote-ls.RemoteLS.prototype._loadPackageJson">
+            function <span class="apidocSignatureSpan">npm-remote-ls.RemoteLS.prototype.</span>_loadPackageJson
+            <span class="apidocSignatureSpan">(task, done)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.npm-remote-ls.RemoteLS.prototype._walkDependencies">
+            function <span class="apidocSignatureSpan">npm-remote-ls.RemoteLS.prototype.</span>_walkDependencies
+            <span class="apidocSignatureSpan">(task, packageJson, done)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.npm-remote-ls.RemoteLS.prototype.ls">
+            function <span class="apidocSignatureSpan">npm-remote-ls.RemoteLS.prototype.</span>ls
+            <span class="apidocSignatureSpan">(name, version, callback)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.npm-remote-ls" id="apidoc.module.npm-remote-ls">module npm-remote-ls</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.npm-remote-ls.RemoteLS" id="apidoc.element.npm-remote-ls.RemoteLS">
+        function <span class="apidocSignatureSpan">npm-remote-ls.</span>RemoteLS
+        <span class="apidocSignatureSpan">(opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function RemoteLS(opts) {
+  var _this = this
+
+  _.extend(this, {
+    logger: console,
+    development: true, // include dev dependencies.
+    optional: true, // include optional dependencies.
+    verbose: false,
+    registry: require('registry-url')(), // URL of registry to ls.
+    queue: async.queue(function (task, done) {
+      _this._loadPackageJson(task, done)
+    }, 8),
+    tree: {},
+    flat: {}
+  }, require('./config')(), opts)
+
+  this.queue.pause()
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.npm-remote-ls.config" id="apidoc.element.npm-remote-ls.config">
+        function <span class="apidocSignatureSpan">npm-remote-ls.</span>config
+        <span class="apidocSignatureSpan">(opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">config = function (opts) {
+  return require('./config')(opts)
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+    })
+var argv = yargs.argv
+var ls = require('../lib').ls
+var treeify = require('treeify')
+var spinner = require('char-spinner')
+var npa = require('npm-package-arg')
+
+require('../lib').<span class="apidocCodeKeywordSpan">config</span>({
+  verbose: argv.verbose,
+  development: argv.development,
+  optional: argv.optional,
+  registry: argv.registry
+})
+
+var name = argv.name || argv._[0] || ''
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.npm-remote-ls.ls" id="apidoc.element.npm-remote-ls.ls">
+        function <span class="apidocSignatureSpan">npm-remote-ls.</span>ls
+        <span class="apidocSignatureSpan">(name, version, flatten, cb)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">ls = function (name, version, flatten, cb) {
+  var ls = new exports.RemoteLS()
+
+  if (typeof version === 'function') {
+    cb = version
+    version = 'latest'
+  }
+
+  if (typeof flatten === 'function') {
+    cb = flatten
+    flatten = false
+  }
+
+  ls.ls(name, version, function () {
+    if (flatten) cb(Object.keys(ls.flat))
+    else cb(ls.tree)
+  })
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.npm-remote-ls.RemoteLS" id="apidoc.module.npm-remote-ls.RemoteLS">module npm-remote-ls.RemoteLS</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.npm-remote-ls.RemoteLS.RemoteLS" id="apidoc.element.npm-remote-ls.RemoteLS.RemoteLS">
+        function <span class="apidocSignatureSpan">npm-remote-ls.</span>RemoteLS
+        <span class="apidocSignatureSpan">(opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function RemoteLS(opts) {
+  var _this = this
+
+  _.extend(this, {
+    logger: console,
+    development: true, // include dev dependencies.
+    optional: true, // include optional dependencies.
+    verbose: false,
+    registry: require('registry-url')(), // URL of registry to ls.
+    queue: async.queue(function (task, done) {
+      _this._loadPackageJson(task, done)
+    }, 8),
+    tree: {},
+    flat: {}
+  }, require('./config')(), opts)
+
+  this.queue.pause()
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.npm-remote-ls.RemoteLS.prototype" id="apidoc.module.npm-remote-ls.RemoteLS.prototype">module npm-remote-ls.RemoteLS.prototype</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.npm-remote-ls.RemoteLS.prototype._guessVersion" id="apidoc.element.npm-remote-ls.RemoteLS.prototype._guessVersion">
+        function <span class="apidocSignatureSpan">npm-remote-ls.RemoteLS.prototype.</span>_guessVersion
+        <span class="apidocSignatureSpan">(versionString, packageJson)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">_guessVersion = function (versionString, packageJson) {
+  if (versionString === 'latest') versionString = '*'
+
+  var availableVersions = Object.keys(packageJson.versions)
+  var version = semver.maxSatisfying(availableVersions, versionString, true)
+
+  // check for prerelease-only versions
+  if (!version &amp;&amp; versionString === '*' &amp;&amp; availableVersions.every(function (av) {
+    return new semver.SemVer(av, true).prerelease.length
+  })) {
+    // just use latest then
+    version = packageJson['dist-tags'] &amp;&amp; packageJson['dist-tags'].latest
+  }
+
+  if (!version) throw Error('could not find a satisfactory version for string ' + versionString)
+  else return version
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.npm-remote-ls.RemoteLS.prototype._loadPackageJson" id="apidoc.element.npm-remote-ls.RemoteLS.prototype._loadPackageJson">
+        function <span class="apidocSignatureSpan">npm-remote-ls.RemoteLS.prototype.</span>_loadPackageJson
+        <span class="apidocSignatureSpan">(task, done)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">_loadPackageJson = function (task, done) {
+  var _this = this
+  var name = task.name
+
+  // account for scoped packages like @foo/bar
+  var couchPackageName = name &amp;&amp; npa(name).escapedName
+
+  // wrap done so it's only called once
+  // if done throws in _walkDependencies, it will be called again in catch below
+  // we want to avoid "Callback was already called." from async
+  done = once(done)
+
+  request.get(this.registry.replace(/\/$/, '') + '/' + couchPackageName, {json: true}, function (err, res, obj) {
+    if (err || (res.statusCode &lt; 200 || res.statusCode &gt;= 400)) {
+      var message = res ? 'status = ' + res.statusCode : 'error = ' + err.message
+      _this.logger.log(
+        'could not load ' + name + '@' + task.version + ' ' + message
+      )
+      return done()
+    }
+
+    try {
+      if (_this.verbose) console.log('loading:', name + '@' + task.version)
+      _this._walkDependencies(task, obj, done)
+    } catch (e) {
+      _this.logger.log(e.message)
+      done()
+    }
+  })
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.npm-remote-ls.RemoteLS.prototype._walkDependencies" id="apidoc.element.npm-remote-ls.RemoteLS.prototype._walkDependencies">
+        function <span class="apidocSignatureSpan">npm-remote-ls.RemoteLS.prototype.</span>_walkDependencies
+        <span class="apidocSignatureSpan">(task, packageJson, done)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">_walkDependencies = function (task, packageJson, done) {
+  var _this = this
+  var version = this._guessVersion(task.version, packageJson)
+  var dependencies = _.extend(
+    {},
+    packageJson.versions[version].dependencies,
+    this.optional ? packageJson.versions[version].optionalDependencies : {},
+    // show development dependencies if we're at the root, and deevelopment flag is true.
+    (task.parent === this.tree &amp;&amp; this.development) ? packageJson.versions[version].devDependencies : {}
+  )
+  var fullName = packageJson.name + '@' + version
+  var parent = task.parent[fullName] = {}
+
+  if (_this.flat[fullName]) return done()
+  else _this.flat[fullName] = true
+
+  Object.keys(dependencies).forEach(function (name) {
+    _this.queue.push({
+      name: name,
+      version: dependencies[name],
+      parent: parent
+    })
+  })
+
+  done()
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.npm-remote-ls.RemoteLS.prototype.ls" id="apidoc.element.npm-remote-ls.RemoteLS.prototype.ls">
+        function <span class="apidocSignatureSpan">npm-remote-ls.RemoteLS.prototype.</span>ls
+        <span class="apidocSignatureSpan">(name, version, callback)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">ls = function (name, version, callback) {
+  var _this = this
+
+  this.queue.push({
+    name: name,
+    version: version,
+    parent: this.tree
+  })
+
+  this.queue.drain = function () {
+    callback(_this.tree)
+  }
+
+  this.queue.resume()
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
